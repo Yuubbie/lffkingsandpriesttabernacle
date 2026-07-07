@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Kings & Priest Tabernacle</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #8C1D3F; --green-dark: #1B2A4E; --green-deep: #0A1128;
+    --gold: #C9A227; --gold-light: #F0D585;
+    --white: #FFFFFF; --cream: #F9F6F0; --charcoal: #1A1A1A; --grey: #666;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--charcoal); min-height:100vh; }
+
+  /* ---------- LOGIN SCREEN ---------- */
+  #login-screen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--green-deep) 0%, var(--green-dark) 100%); padding:20px;
+  }
+  .login-box {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12);
+    border-radius:14px; padding:44px 36px; max-width:380px; width:100%; text-align:center;
+  }
+  .login-box h1 {
+    font-family:'Playfair Display',serif; color:var(--gold-light); font-size:1.4rem; margin-bottom:6px;
+  }
+  .login-box p.sub { color:rgba(255,255,255,0.55); font-size:0.85rem; margin-bottom:28px; }
+  .login-box input {
+    width:100%; padding:12px 14px; margin-bottom:14px; border-radius:6px;
+    border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.06);
+    color:white; font-size:1rem; font-family:inherit;
+  }
+  .login-box input::placeholder { color:rgba(255,255,255,0.35); }
+  .login-box button {
+    width:100%; padding:13px; border:none; border-radius:6px; background:var(--gold);
+    color:var(--green-deep); font-weight:700; font-size:0.95rem; cursor:pointer; font-family:inherit;
+  }
+  .login-box button:hover { background:var(--gold-light); }
+  #login-error { color:#ff8a8a; font-size:0.82rem; margin-top:14px; min-height:1em; }
+
+  /* ---------- DASHBOARD ---------- */
+  #dashboard { display:none; }
+  header.top {
+    background:var(--green-deep); color:white; padding:18px 5%;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  header.top h1 { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--gold-light); }
+  header.top .who { font-size:0.8rem; color:rgba(255,255,255,0.6); }
+  #logout-btn {
+    background:none; border:1px solid rgba(255,255,255,0.3); color:white; padding:8px 16px;
+    border-radius:5px; cursor:pointer; font-size:0.82rem; font-family:inherit;
+  }
+  #logout-btn:hover { border-color:var(--gold); color:var(--gold-light); }
+
+  .tabs {
+    display:flex; gap:4px; padding:14px 5% 0; background:white; flex-wrap:wrap;
+    border-bottom:1px solid #eee;
+  }
+  .tab-btn {
+    background:none; border:none; padding:12px 18px; font-size:0.88rem; font-weight:700;
+    color:var(--grey); cursor:pointer; border-bottom:3px solid transparent; font-family:inherit;
+  }
+  .tab-btn.active { color:var(--green); border-bottom-color:var(--gold); }
+  .tab-count {
+    display:inline-block; background:var(--green); color:white; font-size:0.68rem;
+    border-radius:20px; padding:1px 7px; margin-left:6px; font-weight:700;
+  }
+
+  main { padding:26px 5% 60px; max-width:1100px; margin:0 auto; }
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  .toolbar { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
+  .toolbar input[type=text] {
+    flex:1; min-width:200px; padding:9px 12px; border:1px solid #ddd; border-radius:6px; font-size:0.88rem;
+  }
+  .toolbar label { font-size:0.82rem; color:var(--grey); display:flex; align-items:center; gap:6px; }
+
+  .card {
+    background:white; border-radius:10px; padding:18px 20px; margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05); border-left:4px solid #ddd;
+  }
+  .card.urgent { border-left-color:var(--green); background:#fff7f8; }
+  .card.done { opacity:0.55; }
+  .card-top { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .card-name { font-weight:700; font-size:0.98rem; }
+  .card-date { font-size:0.75rem; color:var(--grey); white-space:nowrap; }
+  .card-row { font-size:0.88rem; color:#333; margin-top:4px; line-height:1.55; }
+  .card-row b { color:var(--grey); font-weight:600; }
+  .card-actions { margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .status-btn {
+    font-size:0.78rem; padding:6px 14px; border-radius:20px; border:1px solid #ccc;
+    background:white; cursor:pointer; font-family:inherit; font-weight:600;
+  }
+  .status-btn.on { background:var(--green); border-color:var(--green); color:white; }
+  .urgent-tag {
+    background:var(--green); color:white; font-size:0.68rem; font-weight:700;
+    padding:2px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .empty-state { text-align:center; color:var(--grey); padding:60px 20px; font-size:0.92rem; }
+  .loading { text-align:center; color:var(--grey); padding:40px; font-size:0.9rem; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Kings &amp; Priest Tabernacle</h1>
+    <p class="sub">Admin access &mdash; sign in to view submissions</p>
+    <input type="email" id="login-email" placeholder="Email address">
+    <input type="password" id="login-password" placeholder="Password">
+    <button onclick="doLogin()">Sign In</button>
+    <p id="login-error"></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header class="top">
+    <h1>&#9878; Admin Dashboard</h1>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="who" id="who-label"></span>
+      <button id="logout-btn" onclick="doLogout()">Log Out</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="prayer">Prayer Requests <span class="tab-count" id="count-prayer">0</span></button>
+    <button class="tab-btn" data-tab="contact">Contact Messages <span class="tab-count" id="count-contact">0</span></button>
+    <button class="tab-btn" data-tab="giving">Giving Records <span class="tab-count" id="count-giving">0</span></button>
+    <button class="tab-btn" data-tab="visitors">Visitors <span class="tab-count" id="count-visitors">0</span></button>
+  </div>
+
+  <main>
+    <div class="toolbar">
+      <input type="text" id="search-box" placeholder="Search by name or phone...">
+      <label><input type="checkbox" id="hide-done"> Hide completed</label>
+    </div>
+
+    <div class="panel active" id="panel-prayer"></div>
+    <div class="panel" id="panel-contact"></div>
+    <div class="panel" id="panel-giving"></div>
+    <div class="panel" id="panel-visitors"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Same project as the main site.
+  const SUPABASE_URL = 'https://znrauxzuxdrfilrlcljn.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpucmF1eHp1eGRyZmlscmxjbGpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NTgzNDYsImV4cCI6MjA5OTAzNDM0Nn0.-ruCtvhRqi9WdkvaALF734mvo1nrDec-s3YnxKS9wzU';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let allData = { prayer: [], contact: [], giving: [], visitors: [] };
+  const tableMap = {
+    prayer: { table: 'prayer_requests', statusField: 'prayed', statusLabel: 'Prayed' },
+    contact: { table: 'contact_messages', statusField: 'read', statusLabel: 'Read' },
+    giving: { table: 'giving_records', statusField: 'acknowledged', statusLabel: 'Acknowledged' },
+    visitors: { table: 'visitor_registrations', statusField: 'followed_up', statusLabel: 'Followed Up' },
+  };
+
+  // ---------- AUTH ----------
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    if (!email || !password) { errEl.textContent = 'Enter your email and password.'; return; }
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.textContent = 'Sign-in failed. Check your email and password.';
+      return;
+    }
+    showDashboard(data.user);
+  }
+
+  function doLogout() {
+    supabase.auth.signOut();
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+  }
+
+  function showDashboard(user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('who-label').textContent = user.email;
+    loadAllData();
+  }
+
+  // Restore session on page load/refresh
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session) showDashboard(data.session.user);
+  });
+
+  // ---------- DATA LOADING ----------
+  async function loadAllData() {
+    for (const key of Object.keys(tableMap)) {
+      document.getElementById('panel-' + key).innerHTML = '<div class="loading">Loading...</div>';
+    }
+    for (const [key, cfg] of Object.entries(tableMap)) {
+      const { data, error } = await supabase.from(cfg.table).select('*').order('created_at', { ascending: false });
+      allData[key] = error ? [] : (data || []);
+      document.getElementById('count-' + key).textContent = allData[key].filter(r => !r[cfg.statusField]).length;
+    }
+    renderAll();
+  }
+
+  function renderAll() {
+    Object.keys(tableMap).forEach(renderPanel);
+  }
+
+  function renderPanel(key) {
+    const cfg = tableMap[key];
+    const panel = document.getElementById('panel-' + key);
+    const searchTerm = document.getElementById('search-box').value.trim().toLowerCase();
+    const hideDone = document.getElementById('hide-done').checked;
+
+    let rows = allData[key];
+    if (searchTerm) {
+      rows = rows.filter(r =>
+        (r.name || '').toLowerCase().includes(searchTerm) ||
+        (r.phone || '').toLowerCase().includes(searchTerm) ||
+        (r.email || '').toLowerCase().includes(searchTerm)
+      );
+    }
+    if (hideDone) rows = rows.filter(r => !r[cfg.statusField]);
+
+    if (rows.length === 0) {
+      panel.innerHTML = '<div class="empty-state">Nothing here yet.</div>';
+      return;
+    }
+
+    panel.innerHTML = rows.map(r => renderCard(key, r, cfg)).join('');
+  }
+
+  function renderCard(key, r, cfg) {
+    const date = r.created_at ? new Date(r.created_at).toLocaleString('en-GB', {
+      day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
+    }) : '';
+    const isDone = !!r[cfg.statusField];
+    const urgentClass = (key === 'prayer' && r.urgent) ? 'urgent' : '';
+
+    let bodyRows = '';
+    if (key === 'prayer') {
+      bodyRows = `<div class="card-row">${escapeHtml(r.request || '')}</div>`;
+      if (r.phone) bodyRows += `<div class="card-row"><b>Phone:</b> ${escapeHtml(r.phone)}</div>`;
+    } else if (key === 'contact') {
+      bodyRows = `<div class="card-row"><b>Subject:</b> ${escapeHtml(r.subject || '-')}</div>
+                  <div class="card-row">${escapeHtml(r.message || '')}</div>
+                  <div class="card-row"><b>Email:</b> ${escapeHtml(r.email || '-')}</div>`;
+    } else if (key === 'giving') {
+      bodyRows = `<div class="card-row"><b>Amount:</b> ₦${Number(r.amount || 0).toLocaleString()}</div>
+                  <div class="card-row"><b>Type:</b> ${escapeHtml(r.type || '-')}</div>
+                  <div class="card-row"><b>Reference:</b> ${escapeHtml(r.reference || '-')}</div>
+                  <div class="card-row"><b>Phone:</b> ${escapeHtml(r.phone || '-')}</div>`;
+    } else if (key === 'visitors') {
+      bodyRows = `<div class="card-row"><b>Phone:</b> ${escapeHtml(r.phone || '-')} &nbsp; <b>Email:</b> ${escapeHtml(r.email || '-')}</div>
+                  <div class="card-row"><b>How they heard about us:</b> ${escapeHtml(r.source || '-')}</div>
+                  <div class="card-row"><b>Visit date:</b> ${escapeHtml(r.visit_date || '-')}</div>
+                  ${r.notes ? `<div class="card-row"><b>Notes:</b> ${escapeHtml(r.notes)}</div>` : ''}`;
+    }
+
+    return `
+      <div class="card ${urgentClass} ${isDone ? 'done' : ''}">
+        <div class="card-top">
+          <span class="card-name">${escapeHtml(r.name || 'Anonymous')} ${(key === 'prayer' && r.urgent) ? '<span class="urgent-tag">Urgent</span>' : ''}</span>
+          <span class="card-date">${date}</span>
+        </div>
+        ${bodyRows}
+        <div class="card-actions">
+          <button class="status-btn ${isDone ? 'on' : ''}" onclick="toggleStatus('${key}', '${r.id}', ${isDone})">
+            ${isDone ? '&#10003; ' + cfg.statusLabel : 'Mark as ' + cfg.statusLabel}
+          </button>
+        </div>
+      </div>`;
+  }
+
+  async function toggleStatus(key, id, currentlyDone) {
+    const cfg = tableMap[key];
+    const { error } = await supabase.from(cfg.table).update({ [cfg.statusField]: !currentlyDone }).eq('id', id);
+    if (!error) {
+      const row = allData[key].find(r => r.id === id);
+      if (row) row[cfg.statusField] = !currentlyDone;
+      document.getElementById('count-' + key).textContent = allData[key].filter(r => !r[cfg.statusField]).length;
+      renderPanel(key);
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ---------- TABS + SEARCH ----------
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+  document.getElementById('search-box').addEventListener('input', renderAll);
+  document.getElementById('hide-done').addEventListener('change', renderAll);
+
+  // Allow Enter key to submit login
+  document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>
